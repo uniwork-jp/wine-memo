@@ -13,7 +13,7 @@ export default function TestPage() {
             ワインの特性を記録しましょう
           </p>
         </div>
-        
+
         <WineLadderChart />
         
         <div className="mt-8 text-center">
