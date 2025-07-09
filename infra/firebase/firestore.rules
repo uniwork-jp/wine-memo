@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Wines collection rules
+    match /wines/{wineId} {
+      // Allow read access to authenticated users
+      allow read: if request.auth != null;
+      
+      // Allow create/update/delete to authenticated users
+      // Users can only modify their own wine entries
+      allow create, update, delete: if request.auth != null;
+      
+      // Optional: Add more specific rules based on user ownership
+      // allow create, update, delete: if request.auth != null && 
+      //   request.auth.uid == resource.data.userId;
+    }
+    
+    // Default rule - deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+} 
