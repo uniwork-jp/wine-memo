@@ -1,0 +1,5 @@
+# Copy this file to terraform.tfvars and update the values
+project_id         = "your-google-cloud-project-id"
+region             = "asia-northeast1"
+firestore_location = "asia-northeast1"
+environment        = "dev" 
