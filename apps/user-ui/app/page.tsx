@@ -17,9 +17,19 @@ import {
   Alert,
   Box,
   Flex,
-  Paper
+  Paper,
+  Modal,
+  ActionIcon,
+  Tooltip,
+  TextInput,
+  NumberInput,
+  Textarea,
+  Select
 } from '@mantine/core';
-import { IconGlass, IconPlus, IconStar, IconMapPin, IconCalendar } from '@tabler/icons-react';
+import { IconGlass, IconPlus, IconStar, IconMapPin, IconCalendar, IconTrash, IconEdit } from '@tabler/icons-react';
+import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
+import RadarChart from '../components/RaderChart';
 
 interface Wine {
   id: string;
@@ -44,6 +54,19 @@ export default function Home() {
   const [wines, setWines] = useState<Wine[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [wineToDelete, setWineToDelete] = useState<Wine | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [updateModalOpen, setUpdateModalOpen] = useState(false);
+  const [wineToUpdate, setWineToUpdate] = useState<Wine | null>(null);
+  const [updating, setUpdating] = useState(false);
+  const [wineCharacteristics, setWineCharacteristics] = useState({
+    甘口: 50,
+    軽い: 50,
+    酸味が弱い: 50,
+    渋みが弱い: 50,
+    苦味が少ない: 50,
+  });
 
   useEffect(() => {
     const fetchWines = async () => {
@@ -72,6 +95,158 @@ export default function Home() {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  const handleDeleteClick = (wine: Wine) => {
+    setWineToDelete(wine);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!wineToDelete) return;
+
+    setDeleting(true);
+    try {
+      const response = await fetch(`/api/wine/delete/${wineToDelete.id}`, {
+        method: 'DELETE',
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Remove the wine from the local state
+        setWines(wines.filter(wine => wine.id !== wineToDelete.id));
+        setDeleteModalOpen(false);
+        setWineToDelete(null);
+      } else {
+        setError(data.error || '削除に失敗しました');
+      }
+    } catch (err) {
+      setError('削除中にエラーが発生しました');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setWineToDelete(null);
+  };
+
+  // Form for updating wine
+  const updateForm = useForm({
+    initialValues: {
+      wineName: '',
+      notes: '',
+      rating: 0,
+      region: '',
+      vintage: '',
+      grapeVariety: '',
+    },
+    validate: {
+      wineName: (value) => (value.length < 2 ? 'ワイン名は2文字以上で入力してください' : null),
+      rating: (value) => (value < 0 || value > 5 ? '評価は0-5の間で入力してください' : null),
+    },
+  });
+
+  const handleUpdateClick = (wine: Wine) => {
+    setWineToUpdate(wine);
+    
+    // Convert English characteristics to Japanese format for the form
+    setWineCharacteristics({
+      甘口: wine.characteristics.sweetness,
+      軽い: wine.characteristics.body,
+      酸味が弱い: wine.characteristics.acidity,
+      渋みが弱い: wine.characteristics.tannin,
+      苦味が少ない: wine.characteristics.bitterness,
+    });
+
+    // Set form values
+    updateForm.setValues({
+      wineName: wine.name,
+      notes: wine.notes || '',
+      rating: wine.rating || 0,
+      region: wine.region || '',
+      vintage: wine.vintage || '',
+      grapeVariety: wine.grapeVariety || '',
+    });
+
+    setUpdateModalOpen(true);
+  };
+
+  const handleUpdateSubmit = async (values: typeof updateForm.values) => {
+    if (!wineToUpdate) return;
+
+    setUpdating(true);
+    try {
+      const response = await fetch(`/api/wine/update/${wineToUpdate.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wineName: values.wineName,
+          wineCharacteristics,
+          notes: values.notes || null,
+          rating: values.rating || null,
+          region: values.region || null,
+          vintage: values.vintage || null,
+          grapeVariety: values.grapeVariety || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the wine in the local state
+        const updatedWine = {
+          ...wineToUpdate,
+          name: values.wineName,
+          characteristics: {
+            sweetness: wineCharacteristics.甘口,
+            body: wineCharacteristics.軽い,
+            acidity: wineCharacteristics.酸味が弱い,
+            tannin: wineCharacteristics.渋みが弱い,
+            bitterness: wineCharacteristics.苦味が少ない,
+          },
+          notes: values.notes || undefined,
+          rating: values.rating || undefined,
+          region: values.region || undefined,
+          vintage: values.vintage || undefined,
+          grapeVariety: values.grapeVariety || undefined,
+          updatedAt: new Date().toISOString(),
+        };
+
+        setWines(wines.map(wine => 
+          wine.id === wineToUpdate.id ? updatedWine : wine
+        ));
+
+        setUpdateModalOpen(false);
+        setWineToUpdate(null);
+        
+        notifications.show({
+          title: '成功',
+          message: 'ワイン記録が正常に更新されました',
+          color: 'green',
+        });
+      } else {
+        setError(data.error || '更新に失敗しました');
+      }
+    } catch (err) {
+      setError('更新中にエラーが発生しました');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleUpdateCancel = () => {
+    setUpdateModalOpen(false);
+    setWineToUpdate(null);
+    updateForm.reset();
+  };
+
+  const handleCharacteristicsChange = (newData: typeof wineCharacteristics) => {
+    setWineCharacteristics(newData);
   };
 
   return (
@@ -197,19 +372,43 @@ export default function Home() {
                   <Paper key={wine.id} p="md" withBorder radius="md">
                     <Flex justify="space-between" align="flex-start" gap="md">
                       <Box flex={1}>
-                        <Group mb="sm">
-                          <Title order={3} size="h4">
-                            {wine.name}
-                          </Title>
-                          {wine.rating && (
-                            <Badge 
-                              leftSection={<IconStar size={12} />}
-                              variant="light"
-                              color="yellow"
-                            >
-                              {wine.rating}/5
-                            </Badge>
-                          )}
+                        <Group mb="sm" justify="space-between">
+                          <Group>
+                            <Title order={3} size="h4">
+                              {wine.name}
+                            </Title>
+                            {wine.rating && (
+                              <Badge 
+                                leftSection={<IconStar size={12} />}
+                                variant="light"
+                                color="yellow"
+                              >
+                                {wine.rating}/5
+                              </Badge>
+                            )}
+                          </Group>
+                          <Group gap="xs">
+                            <Tooltip label="編集" withArrow>
+                              <ActionIcon
+                                variant="subtle"
+                                color="blue"
+                                size="sm"
+                                onClick={() => handleUpdateClick(wine)}
+                              >
+                                <IconEdit size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                            <Tooltip label="削除" withArrow>
+                              <ActionIcon
+                                variant="subtle"
+                                color="red"
+                                size="sm"
+                                onClick={() => handleDeleteClick(wine)}
+                              >
+                                <IconTrash size={16} />
+                              </ActionIcon>
+                            </Tooltip>
+                          </Group>
                         </Group>
                         
                         <Flex align="center" gap="lg" mb="md">
@@ -260,8 +459,18 @@ export default function Home() {
                             variant="light"
                             size="sm"
                           >
-                            {formatDate(wine.createdAt)}
+                            作成: {formatDate(wine.createdAt)}
                           </Badge>
+                          {wine.updatedAt && wine.updatedAt !== wine.createdAt && (
+                            <Badge 
+                              leftSection={<IconEdit size={12} />}
+                              variant="light"
+                              color="blue"
+                              size="sm"
+                            >
+                              更新: {formatDate(wine.updatedAt)}
+                            </Badge>
+                          )}
                         </Group>
                       </Box>
                     </Flex>
@@ -319,6 +528,135 @@ export default function Home() {
           </Card>
         </Stack>
       </Container>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        opened={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        title="ワイン記録の削除"
+        centered
+        size="sm"
+      >
+        <Stack gap="md">
+          <Text>
+            「<strong>{wineToDelete?.name}</strong>」を削除しますか？
+          </Text>
+          <Text size="sm" c="dimmed">
+            この操作は取り消すことができません。
+          </Text>
+          <Group justify="flex-end" gap="sm">
+            <Button variant="light" onClick={handleDeleteCancel}>
+              キャンセル
+            </Button>
+            <Button 
+              color="red" 
+              onClick={handleDeleteConfirm}
+              loading={deleting}
+              leftSection={<IconTrash size={16} />}
+            >
+              削除
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Update Wine Modal */}
+      <Modal
+        opened={updateModalOpen}
+        onClose={handleUpdateCancel}
+        title="ワイン記録の編集"
+        centered
+        size="xl"
+      >
+        <form onSubmit={updateForm.onSubmit(handleUpdateSubmit)}>
+          <Stack gap="lg">
+            <Grid gutter="lg">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="md">
+                  <TextInput
+                    label="ワイン名"
+                    placeholder="例: シャトー・マルゴー 2018"
+                    required
+                    {...updateForm.getInputProps('wineName')}
+                  />
+                  
+                  <Textarea
+                    label="メモ"
+                    placeholder="ワインの感想やメモを入力してください"
+                    rows={3}
+                    {...updateForm.getInputProps('notes')}
+                  />
+
+                  <NumberInput
+                    label="評価"
+                    placeholder="0-5の間で評価してください"
+                    min={0}
+                    max={5}
+                    step={0.5}
+                    {...updateForm.getInputProps('rating')}
+                  />
+
+                  <TextInput
+                    label="産地"
+                    placeholder="例: フランス・ボルドー"
+                    {...updateForm.getInputProps('region')}
+                  />
+
+                  <TextInput
+                    label="ヴィンテージ"
+                    placeholder="例: 2018"
+                    {...updateForm.getInputProps('vintage')}
+                  />
+
+                  <TextInput
+                    label="ブドウ品種"
+                    placeholder="例: カベルネ・ソーヴィニヨン"
+                    {...updateForm.getInputProps('grapeVariety')}
+                  />
+                </Stack>
+              </Grid.Col>
+              
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="md">
+                  <Text fw={500} size="lg">
+                    ワイン特性チャート
+                  </Text>
+                  <Text size="sm" c="dimmed">
+                    各特性をドラッグして調整してください
+                  </Text>
+                  
+                  <Box ta="center">
+                    <RadarChart
+                      data={wineCharacteristics}
+                      width={300}
+                      height={300}
+                      onDataChange={handleCharacteristicsChange}
+                    />
+                  </Box>
+                  
+                  <Text size="xs" c="dimmed" ta="center">
+                    甘さ・重さ・酸味・渋み・苦味の5つの特性を評価できます
+                  </Text>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+            
+            <Group justify="flex-end" gap="sm">
+              <Button variant="light" onClick={handleUpdateCancel}>
+                キャンセル
+              </Button>
+              <Button 
+                type="submit"
+                color="blue"
+                loading={updating}
+                leftSection={<IconEdit size={16} />}
+              >
+                更新
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
     </Box>
   );
 }
