@@ -25,6 +25,7 @@ output "firestore_indexes" {
     google_firestore_index.wines_characteristics.id,
     google_firestore_index.wines_region_grape.id,
     google_firestore_index.wines_rating.id,
-    google_firestore_index.wines_vintage.id
+    google_firestore_index.wines_vintage.id,
+    google_firestore_index.wines_name_search.id
   ]
 } 

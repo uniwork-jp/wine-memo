@@ -11,7 +11,9 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "clean": "turbo run clean",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "generate-indexes": "tsx scripts/generate-terraform-indexes.ts",
+    "generate-indexes-safe": "tsx scripts/generate-terraform-indexes-safe.ts"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -23,8 +25,12 @@
     "eslint-config-next": "15.3.5",
     "prettier": "^3.0.0",
     "tailwindcss": "^4.1.11",
+    "tsx": "^4.20.3",
     "turbo": "2.5.4",
     "typescript": "^5.8.3"
   },
-  "packageManager": "pnpm@8.15.0"
+  "packageManager": "pnpm@8.15.0",
+  "dependencies": {
+    "zod": "^3.25.75"
+  }
 }
