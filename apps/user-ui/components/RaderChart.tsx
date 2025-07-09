@@ -31,11 +31,11 @@ const RadarChart: React.FC<RadarChartProps> = ({
   const [isDragging, setIsDragging] = useState(false);
 
   const characteristics = [
-    { key: '甘口', label: '甘口 ←→ 辛口', color: '#FF6B6B' },
-    { key: '軽い', label: '軽い ←→ 重い', color: '#4ECDC4' },
-    { key: '酸味が弱い', label: '酸味が弱い ←→ 酸味が強い', color: '#45B7D1' },
-    { key: '渋みが弱い', label: '渋みが弱い ←→ 渋みが強い', color: '#96CEB4' },
-    { key: '苦味が少ない', label: '苦味が少ない ←→ 苦味がある', color: '#FFEAA7' }
+    { key: '甘口', label: '甘さ', color: '#FF6B6B' },
+    { key: '軽い', label: '重さ', color: '#4ECDC4' },
+    { key: '酸味が弱い', label: '酸味', color: '#45B7D1' },
+    { key: '渋みが弱い', label: '渋み', color: '#96CEB4' },
+    { key: '苦味が少ない', label: '苦味', color: '#FFEAA7' }
   ];
 
   const getPointPosition = useCallback((index: number, value: number) => {
