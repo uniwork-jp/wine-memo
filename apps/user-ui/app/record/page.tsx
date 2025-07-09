@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { TextInput, Container, Title, Paper, Stack, Button, Grid, Text } from '@mantine/core';
+import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
 import RadarChart from '@/components/RaderChart';
 
@@ -23,10 +24,52 @@ export default function RecordPage() {
     },
   });
 
-  const handleSubmit = (values: typeof form.values) => {
-    console.log('Wine name:', values.wineName);
-    console.log('Wine characteristics:', wineCharacteristics);
-    // TODO: Add wine record logic here
+  const handleSubmit = async (values: typeof form.values) => {
+    try {
+      const response = await fetch('/api/wine/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          wineName: values.wineName,
+          wineCharacteristics,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        notifications.show({
+          title: '成功',
+          message: result.message,
+          color: 'green',
+        });
+        
+        // Reset form
+        form.reset();
+        setWineCharacteristics({
+          甘口: 50,
+          軽い: 50,
+          酸味が弱い: 50,
+          渋みが弱い: 50,
+          苦味が少ない: 50,
+        });
+      } else {
+        notifications.show({
+          title: 'エラー',
+          message: result.error || 'ワイン記録の保存に失敗しました',
+          color: 'red',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      notifications.show({
+        title: 'エラー',
+        message: 'ネットワークエラーが発生しました',
+        color: 'red',
+      });
+    }
   };
 
   const handleCharacteristicsChange = (newData: typeof wineCharacteristics) => {
