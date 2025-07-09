@@ -17,8 +17,6 @@ interface WineChartProps {
   className?: string;
   showLabels?: boolean;
   showValues?: boolean;
-  interactive?: boolean;
-  onDataChange?: (newData: WineCharacteristics) => void;
 }
 
 const WineChart: React.FC<WineChartProps> = ({ 
@@ -27,9 +25,7 @@ const WineChart: React.FC<WineChartProps> = ({
   height = 200, 
   className = '',
   showLabels = false,
-  showValues = false,
-  interactive = false,
-  onDataChange
+  showValues = false
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -157,7 +153,7 @@ const WineChart: React.FC<WineChartProps> = ({
       });
     }
 
-  }, [characteristics, width, height, showLabels, showValues]);
+  }, [characteristics, width, height, showLabels, showValues, characteristicLabels, getPointPosition]);
 
   return (
     <div className={`inline-block ${className}`}>

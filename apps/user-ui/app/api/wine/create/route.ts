@@ -1,32 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminWineService } from '@wine-memo/firebase';
+import { WineCreateSchema } from '@wine-memo/schemas';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { wineName, wineCharacteristics } = body;
-
-    // Validate required fields
-    if (!wineName || !wineCharacteristics) {
+    
+    // Validate the request body using Zod
+    const validationResult = WineCreateSchema.safeParse(body);
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'ワイン名と特性データが必要です' },
+        { 
+          error: '入力データが無効です',
+          details: validationResult.error.errors 
+        },
         { status: 400 }
       );
     }
 
-    // Map the Japanese characteristics to English for the database
-    const characteristics = {
-      sweetness: wineCharacteristics.甘口,
-      body: wineCharacteristics.軽い,
-      acidity: wineCharacteristics.酸味が弱い,
-      tannin: wineCharacteristics.渋みが弱い,
-      bitterness: wineCharacteristics.苦味が少ない,
-    };
+    const { name, characteristics, notes, rating, region, vintage, grapeVariety } = validationResult.data;
 
     // Create the wine record using admin service
     const wineData = {
-      name: wineName,
+      name,
       characteristics,
+      notes: notes || null,
+      rating: rating || null,
+      region: region || null,
+      vintage: vintage || null,
+      grapeVariety: grapeVariety || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
 interface WineCharacteristics {
   甘口: number; // Sweetness (甘口 ←→ 辛口)
@@ -30,13 +30,13 @@ const RadarChart: React.FC<RadarChartProps> = ({
   const [draggedPoint, setDraggedPoint] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const characteristics = [
+  const characteristics = useMemo(() => [
     { key: '甘口', label: '甘さ', color: '#FF6B6B' },
     { key: '軽い', label: '重さ', color: '#4ECDC4' },
     { key: '酸味が弱い', label: '酸味', color: '#45B7D1' },
     { key: '渋みが弱い', label: '渋み', color: '#96CEB4' },
     { key: '苦味が少ない', label: '苦味', color: '#FFEAA7' }
-  ];
+  ], []);
 
   const getPointPosition = useCallback((index: number, value: number) => {
     const centerX = width / 2;
@@ -60,10 +60,6 @@ const RadarChart: React.FC<RadarChartProps> = ({
     const rect = canvas.getBoundingClientRect();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
-    
-    const centerX = width / 2;
-    const centerY = height / 2;
-    const radius = Math.min(width, height) * 0.35;
 
     let closestPoint: number | null = null;
     let minDistance = Infinity;
@@ -232,7 +228,7 @@ const RadarChart: React.FC<RadarChartProps> = ({
       ctx.fillText(char.label, textX, textY);
     });
 
-  }, [data, width, height, hoveredPoint, draggedPoint, getPointPosition]);
+  }, [data, width, height, hoveredPoint, draggedPoint, getPointPosition, characteristics]);
 
   // Mouse event handlers
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -283,7 +279,7 @@ const RadarChart: React.FC<RadarChartProps> = ({
     }
   };
 
-  const handleTouchEnd = (event: React.TouchEvent<HTMLCanvasElement>) => {
+  const handleTouchEnd = () => {
     setIsDragging(false);
     setDraggedPoint(null);
     setHoveredPoint(null);

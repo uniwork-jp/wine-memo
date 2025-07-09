@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminWineService } from '@wine-memo/firebase';
+import { WineUpdateSchema } from '@wine-memo/schemas';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
-    const { wineName, wineCharacteristics, notes, rating, region, vintage, grapeVariety } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -17,34 +16,32 @@ export async function PUT(
       );
     }
 
-    if (!wineName || !wineCharacteristics) {
+    // Validate the request body using Zod
+    const validationResult = WineUpdateSchema.safeParse({ id, ...body });
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'ワイン名と特性データが必要です' },
+        { 
+          error: '入力データが無効です',
+          details: validationResult.error.errors 
+        },
         { status: 400 }
       );
     }
 
-    // Map the Japanese characteristics to English for the database
-    const characteristics = {
-      sweetness: wineCharacteristics.甘口,
-      body: wineCharacteristics.軽い,
-      acidity: wineCharacteristics.酸味が弱い,
-      tannin: wineCharacteristics.渋みが弱い,
-      bitterness: wineCharacteristics.苦味が少ない,
-    };
+    const { name, characteristics, notes, rating, region, vintage, grapeVariety } = validationResult.data;
 
     // Update the wine record using admin service
     const adminDb = (await import('@wine-memo/firebase')).adminDb;
     const docRef = adminDb.collection('wines').doc(id);
     
     const updateData = {
-      name: wineName,
-      characteristics,
-      notes: notes || null,
-      rating: rating || null,
-      region: region || null,
-      vintage: vintage || null,
-      grapeVariety: grapeVariety || null,
+      ...(name && { name }),
+      ...(characteristics && { characteristics }),
+      ...(notes !== undefined && { notes }),
+      ...(rating !== undefined && { rating }),
+      ...(region !== undefined && { region }),
+      ...(vintage !== undefined && { vintage }),
+      ...(grapeVariety !== undefined && { grapeVariety }),
       updatedAt: new Date().toISOString(),
     };
 

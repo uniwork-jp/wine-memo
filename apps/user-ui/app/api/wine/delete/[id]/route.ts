@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { adminWineService } from '@wine-memo/firebase';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -16,7 +15,8 @@ export async function DELETE(
     }
 
     // Delete the wine using admin service
-    await adminWineService.deleteWine(id);
+    const adminDb = (await import('@wine-memo/firebase')).adminDb;
+    await adminDb.collection('wines').doc(id).delete();
 
     return NextResponse.json(
       { 
