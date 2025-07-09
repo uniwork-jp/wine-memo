@@ -23,8 +23,7 @@ import {
   Tooltip,
   TextInput,
   NumberInput,
-  Textarea,
-  Select
+  Textarea
 } from '@mantine/core';
 import { IconGlass, IconPlus, IconStar, IconMapPin, IconCalendar, IconTrash, IconEdit } from '@tabler/icons-react';
 import { useForm } from '@mantine/form';
@@ -79,7 +78,7 @@ export default function Home() {
         } else {
           setError(data.error || 'ワイン記録の取得に失敗しました');
         }
-      } catch (err) {
+      } catch {
         setError('ワイン記録の取得中にエラーが発生しました');
       } finally {
         setLoading(false);
@@ -121,7 +120,7 @@ export default function Home() {
       } else {
         setError(data.error || '削除に失敗しました');
       }
-    } catch (err) {
+    } catch {
       setError('削除中にエラーが発生しました');
     } finally {
       setDeleting(false);
@@ -185,13 +184,19 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          wineName: values.wineName,
-          wineCharacteristics,
-          notes: values.notes || null,
-          rating: values.rating || null,
-          region: values.region || null,
-          vintage: values.vintage || null,
-          grapeVariety: values.grapeVariety || null,
+          name: values.wineName,
+          characteristics: {
+            sweetness: wineCharacteristics.甘口,
+            body: wineCharacteristics.軽い,
+            acidity: wineCharacteristics.酸味が弱い,
+            tannin: wineCharacteristics.渋みが弱い,
+            bitterness: wineCharacteristics.苦味が少ない,
+          },
+          notes: values.notes || undefined,
+          rating: values.rating || undefined,
+          region: values.region || undefined,
+          vintage: values.vintage || undefined,
+          grapeVariety: values.grapeVariety || undefined,
         }),
       });
 
@@ -232,7 +237,7 @@ export default function Home() {
       } else {
         setError(data.error || '更新に失敗しました');
       }
-    } catch (err) {
+    } catch {
       setError('更新中にエラーが発生しました');
     } finally {
       setUpdating(false);

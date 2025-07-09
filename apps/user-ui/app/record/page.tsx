@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, 
-  Title, 
-  Text, 
-  Card, 
+import {
+  Container,
+  Title,
+  Text,
+  Card,
   Button, 
   Grid, 
   Group, 
@@ -14,8 +14,7 @@ import {
   Box,
   TextInput,
   NumberInput,
-  Textarea,
-  Select
+  Textarea
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
@@ -55,13 +54,19 @@ export default function RecordPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          wineName: values.wineName,
-          wineCharacteristics,
-          notes: values.notes || null,
-          rating: values.rating || null,
-          region: values.region || null,
-          vintage: values.vintage || null,
-          grapeVariety: values.grapeVariety || null,
+          name: values.wineName,
+          characteristics: {
+            sweetness: wineCharacteristics.甘口,
+            body: wineCharacteristics.軽い,
+            acidity: wineCharacteristics.酸味が弱い,
+            tannin: wineCharacteristics.渋みが弱い,
+            bitterness: wineCharacteristics.苦味が少ない,
+          },
+          notes: values.notes || undefined,
+          rating: values.rating || undefined,
+          region: values.region || undefined,
+          vintage: values.vintage || undefined,
+          grapeVariety: values.grapeVariety || undefined,
         }),
       });
 
