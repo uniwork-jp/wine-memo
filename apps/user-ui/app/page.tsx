@@ -269,7 +269,7 @@ export default function Home() {
           </Box>
 
           {/* Feature Cards */}
-          <Grid gutter="lg">
+          {/* <Grid gutter="lg">
             <Grid.Col span={{ base: 12, md: 6 }}>
               <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Group mb="md">
@@ -315,7 +315,7 @@ export default function Home() {
                 </Button>
               </Card>
             </Grid.Col>
-          </Grid>
+          </Grid> */}
 
           {/* Wine Records List */}
           <Card shadow="sm" padding="xl" radius="md" withBorder>
