@@ -3,6 +3,23 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { WineChart } from '../components';
+import { 
+  Container, 
+  Title, 
+  Text, 
+  Card, 
+  Button, 
+  Grid, 
+  Group, 
+  Stack, 
+  Badge, 
+  Loader, 
+  Alert,
+  Box,
+  Flex,
+  Paper
+} from '@mantine/core';
+import { IconGlass, IconPlus, IconStar, IconMapPin, IconCalendar } from '@tabler/icons-react';
 
 interface Wine {
   id: string;
@@ -58,97 +75,144 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-gray-800 mb-4">
-            ワインメモ
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            お気に入りのワインの特性を記録して、あなただけのワインライブラリを作りましょう
-          </p>
-        </div>
+    <Box bg="gray.0" mih="100vh" py="xl">
+      <Container size="lg">
+        <Stack gap="xl">
+          {/* Header */}
+          <Box ta="center" py="xl">
+            <Title order={1} size="3.5rem" c="dark.8" mb="md">
+              ワインメモ
+            </Title>
+            <Text size="xl" c="dimmed" maw={600} mx="auto">
+              お気に入りのワインの特性を記録して、あなただけのワインライブラリを作りましょう
+            </Text>
+          </Box>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                ワイン特性チャート
-              </h2>
-              <p className="text-gray-600 mb-4">
-                甘口から辛口、軽いから重いまで、ワインの5つの特性をスライダーで評価できます。
-              </p>
-              <Link 
-                href="/test"
-                className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
-              >
-                チャートを見る
-              </Link>
-            </div>
+          {/* Feature Cards */}
+          <Grid gutter="lg">
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Group mb="md">
+                  <IconGlass size={32} color="var(--mantine-color-purple-6)" />
+                  <Title order={2} size="h3">
+                    ワイン特性チャート
+                  </Title>
+                </Group>
+                <Text c="dimmed" mb="lg">
+                  甘口から辛口、軽いから重いまで、ワインの5つの特性をスライダーで評価できます。
+                </Text>
+                <Button 
+                  component={Link}
+                  href="/test"
+                  color="purple"
+                  leftSection={<IconGlass size={16} />}
+                  fullWidth
+                >
+                  チャートを見る
+                </Button>
+              </Card>
+            </Grid.Col>
 
-            <div className="bg-white rounded-lg shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                ワイン記録
-              </h2>
-              <p className="text-gray-600 mb-4">
-                飲んだワインの名前、産地、価格、感想などを記録して保存できます。
-              </p>
-              <Link 
-                href="/record"
-                className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium"
-              >
-                記録を追加
-              </Link>
-            </div>
-          </div>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Group mb="md">
+                  <IconPlus size={32} color="var(--mantine-color-pink-6)" />
+                  <Title order={2} size="h3">
+                    ワイン記録
+                  </Title>
+                </Group>
+                <Text c="dimmed" mb="lg">
+                  飲んだワインの名前、産地、価格、感想などを記録して保存できます。
+                </Text>
+                <Button 
+                  component={Link}
+                  href="/record"
+                  color="pink"
+                  leftSection={<IconPlus size={16} />}
+                  fullWidth
+                >
+                  記録を追加
+                </Button>
+              </Card>
+            </Grid.Col>
+          </Grid>
 
           {/* Wine Records List */}
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-12">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
-                記録されたワイン ({wines.length})
-              </h2>
-              <Link 
+          <Card shadow="sm" padding="xl" radius="md" withBorder>
+            <Group justify="space-between" mb="lg">
+              <Group>
+                <IconGlass size={24} />
+                <Title order={2} size="h3">
+                  記録されたワイン
+                </Title>
+                <Badge size="lg" variant="light">
+                  {wines.length}
+                </Badge>
+              </Group>
+              <Button 
+                component={Link}
                 href="/record"
-                className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                color="green"
+                leftSection={<IconPlus size={16} />}
+                size="sm"
               >
                 新しい記録
-              </Link>
-            </div>
+              </Button>
+            </Group>
 
             {loading && (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-                <p className="mt-2 text-gray-600">ワイン記録を読み込み中...</p>
-              </div>
+              <Box ta="center" py="xl">
+                <Loader size="lg" />
+                <Text c="dimmed" mt="md">ワイン記録を読み込み中...</Text>
+              </Box>
             )}
 
             {error && (
-              <div className="text-center py-8">
-                <p className="text-red-600">{error}</p>
-              </div>
+              <Alert variant="light" color="red" title="エラー" icon={<IconGlass size={16} />}>
+                {error}
+              </Alert>
             )}
 
             {!loading && !error && wines.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-600 mb-4">まだワイン記録がありません</p>
-                <Link 
+              <Box ta="center" py="xl">
+                <IconGlass size={48} color="var(--mantine-color-gray-4)" />
+                <Text c="dimmed" size="lg" mt="md" mb="lg">
+                  まだワイン記録がありません
+                </Text>
+                <Button 
+                  component={Link}
                   href="/record"
-                  className="inline-block bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors font-medium"
+                  color="purple"
+                  leftSection={<IconPlus size={16} />}
+                  size="lg"
                 >
                   最初の記録を追加
-                </Link>
-              </div>
+                </Button>
+              </Box>
             )}
 
             {!loading && !error && wines.length > 0 && (
-              <div className="grid gap-4">
+              <Stack gap="md">
                 {wines.map((wine) => (
-                  <div key={wine.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">{wine.name}</h3>
-                        <div className="flex items-center gap-4 mb-3">
+                  <Paper key={wine.id} p="md" withBorder radius="md">
+                    <Flex justify="space-between" align="flex-start" gap="md">
+                      <Box flex={1}>
+                        <Group mb="sm">
+                          <Title order={3} size="h4">
+                            {wine.name}
+                          </Title>
+                          {wine.rating && (
+                            <Badge 
+                              leftSection={<IconStar size={12} />}
+                              variant="light"
+                              color="yellow"
+                            >
+                              {wine.rating}/5
+                            </Badge>
+                          )}
+                        </Group>
+                        
+                        <Flex align="center" gap="lg" mb="md">
                           <WineChart 
                             characteristics={wine.characteristics}
                             width={120}
@@ -156,75 +220,105 @@ export default function Home() {
                             showValues={true}
                             className="flex-shrink-0"
                           />
-                          <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm text-gray-600">
-                            <div>甘口: {wine.characteristics.sweetness}</div>
-                            <div>軽い: {wine.characteristics.body}</div>
-                            <div>酸味: {wine.characteristics.acidity}</div>
-                            <div>渋み: {wine.characteristics.tannin}</div>
-                            <div>苦味: {wine.characteristics.bitterness}</div>
-                          </div>
-                        </div>
+                          <Grid gutter="xs" style={{ flex: 1 }}>
+                            <Grid.Col span={6}>
+                              <Text size="sm" c="dimmed">甘口: {wine.characteristics.sweetness}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                              <Text size="sm" c="dimmed">軽い: {wine.characteristics.body}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                              <Text size="sm" c="dimmed">酸味: {wine.characteristics.acidity}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={6}>
+                              <Text size="sm" c="dimmed">渋み: {wine.characteristics.tannin}</Text>
+                            </Grid.Col>
+                            <Grid.Col span={12}>
+                              <Text size="sm" c="dimmed">苦味: {wine.characteristics.bitterness}</Text>
+                            </Grid.Col>
+                          </Grid>
+                        </Flex>
+                        
                         {wine.notes && (
-                          <p className="text-gray-600 text-sm mb-2">{wine.notes}</p>
+                          <Text size="sm" c="dimmed" mb="sm">
+                            {wine.notes}
+                          </Text>
                         )}
-                        {wine.region && (
-                          <p className="text-gray-500 text-xs">産地: {wine.region}</p>
-                        )}
-                      </div>
-                      <div className="text-right text-xs text-gray-500 ml-4">
-                        <div>{formatDate(wine.createdAt)}</div>
-                        {wine.rating && (
-                          <div className="mt-1">
-                            <span className="text-yellow-500">★</span> {wine.rating}/5
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                        
+                        <Group gap="xs">
+                          {wine.region && (
+                            <Badge 
+                              leftSection={<IconMapPin size={12} />}
+                              variant="light"
+                              size="sm"
+                            >
+                              {wine.region}
+                            </Badge>
+                          )}
+                          <Badge 
+                            leftSection={<IconCalendar size={12} />}
+                            variant="light"
+                            size="sm"
+                          >
+                            {formatDate(wine.createdAt)}
+                          </Badge>
+                        </Group>
+                      </Box>
+                    </Flex>
+                  </Paper>
                 ))}
-              </div>
+              </Stack>
             )}
-          </div>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+          {/* Wine Characteristics Explanation */}
+          <Card shadow="sm" padding="xl" radius="md" withBorder>
+            <Title order={2} size="h3" ta="center" mb="lg">
               ワイン特性の説明
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">甘口 ←→ 辛口（ドライ）</h3>
-                <p className="text-gray-600 text-sm">
-                  ワインの甘さの度合い。甘口は糖分が多く、辛口は糖分が少なくドライな味わい。
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">軽い ←→ 重い（ボディ）</h3>
-                <p className="text-gray-600 text-sm">
-                  ワインの口当たりや重厚感。軽いワインはさっぱりとし、重いワインは濃厚で存在感がある。
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">酸味が弱い ←→ 酸味が強い</h3>
-                <p className="text-gray-600 text-sm">
-                  ワインの酸味の強さ。適度な酸味はワインを爽やかにし、強すぎると酸っぱく感じる。
-                </p>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">渋みが弱い ←→ 渋みが強い（タンニン）</h3>
-                <p className="text-gray-600 text-sm">
-                  タンニンによる渋みの強さ。赤ワインに特徴的で、渋みはワインの構造を作る重要な要素。
-                </p>
-              </div>
-              <div className="md:col-span-2">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">苦味が少ない ←→ 苦味がある</h3>
-                <p className="text-gray-600 text-sm">
-                  ワインの苦味の有無。適度な苦味は複雑さを加えるが、強すぎると飲みにくくなる。
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Title>
+            <Grid gutter="lg">
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="md">
+                  <Box>
+                    <Title order={3} size="h5" mb="xs">甘口 ←→ 辛口（ドライ）</Title>
+                    <Text size="sm" c="dimmed">
+                      ワインの甘さの度合い。甘口は糖分が多く、辛口は糖分が少なくドライな味わい。
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Title order={3} size="h5" mb="xs">軽い ←→ 重い（ボディ）</Title>
+                    <Text size="sm" c="dimmed">
+                      ワインの口当たりや重厚感。軽いワインはさっぱりとし、重いワインは濃厚で存在感がある。
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Title order={3} size="h5" mb="xs">酸味が弱い ←→ 酸味が強い</Title>
+                    <Text size="sm" c="dimmed">
+                      ワインの酸味の強さ。適度な酸味はワインを爽やかにし、強すぎると酸っぱく感じる。
+                    </Text>
+                  </Box>
+                </Stack>
+              </Grid.Col>
+              <Grid.Col span={{ base: 12, md: 6 }}>
+                <Stack gap="md">
+                  <Box>
+                    <Title order={3} size="h5" mb="xs">渋みが弱い ←→ 渋みが強い（タンニン）</Title>
+                    <Text size="sm" c="dimmed">
+                      タンニンによる渋みの強さ。赤ワインに特徴的で、渋みはワインの構造を作る重要な要素。
+                    </Text>
+                  </Box>
+                  <Box>
+                    <Title order={3} size="h5" mb="xs">苦味が少ない ←→ 苦味がある</Title>
+                    <Text size="sm" c="dimmed">
+                      ワインの苦味の有無。適度な苦味は複雑さを加えるが、強すぎると飲みにくくなる。
+                    </Text>
+                  </Box>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+          </Card>
+        </Stack>
+      </Container>
+    </Box>
   );
 }
