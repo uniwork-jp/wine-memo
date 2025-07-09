@@ -9,8 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@wine-memo/schemas": "workspace:*",
+    "@emotion/react": "^11.14.0",
+    "@mantine/core": "^8.1.3",
+    "@mantine/form": "^8.1.3",
+    "@mantine/hooks": "^8.1.3",
     "@wine-memo/firebase": "workspace:*",
+    "@wine-memo/schemas": "workspace:*",
     "next": "15.3.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
@@ -24,4 +28,4 @@
     "tailwindcss": "^4.1.11",
     "typescript": "^5.8.3"
   }
-} 
+}

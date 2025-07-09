@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import RadarChart from '../../components/RaderChart';
+import RadarChart from '@/components/RaderChart';
 
 interface WineCharacteristics {
   甘口: number;

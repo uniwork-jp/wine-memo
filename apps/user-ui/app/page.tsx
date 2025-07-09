@@ -38,9 +38,12 @@ export default function Home() {
               <p className="text-gray-600 mb-4">
                 飲んだワインの名前、産地、価格、感想などを記録して保存できます。
               </p>
-              <button className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium">
+              <Link 
+                href="/record"
+                className="inline-block bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700 transition-colors font-medium"
+              >
                 記録を追加
-              </button>
+              </Link>
             </div>
           </div>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import WineLadderChart from '../../components/WineLadderChart';
+import WineLadderChart from '@/components/WineLadderChart';
 
 export default function TestPage() {
   return (
