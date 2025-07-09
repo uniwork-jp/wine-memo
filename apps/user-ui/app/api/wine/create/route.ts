@@ -1,68 +1,53 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server';
+import { wineService } from '@wine-memo/firebase';
 
-// Wine creation schema
-const WineCreateSchema = z.object({
-  name: z.string().min(1, 'Wine name is required'),
-  characteristics: z.object({
-    sweetness: z.number().min(0).max(100),
-    body: z.number().min(0).max(100),
-    acidity: z.number().min(0).max(100),
-    tannin: z.number().min(0).max(100),
-    bitterness: z.number().min(0).max(100),
-  }),
-  notes: z.string().optional(),
-  rating: z.number().min(1).max(5).optional(),
-  vintage: z.string().optional(),
-  region: z.string().optional(),
-  grapeVariety: z.string().optional(),
-});
-
-type WineCreateRequest = z.infer<typeof WineCreateSchema>;
-
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request: NextRequest) {
   try {
-    // Validate request body
-    const validatedData = WineCreateSchema.parse(req.body);
-    
-    // TODO: Add database integration here
-    // For now, just return the validated data
-    const wineEntry = {
-      id: Date.now().toString(), // Temporary ID generation
-      ...validatedData,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+    const body = await request.json();
+    const { wineName, wineCharacteristics } = body;
 
-    // Simulate database save
-    console.log('Saving wine entry:', wineEntry);
-
-    return res.status(201).json({
-      success: true,
-      data: wineEntry,
-      message: 'Wine entry created successfully'
-    });
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return res.status(400).json({
-        success: false,
-        error: 'Validation error',
-        details: error.errors
-      });
+    // Validate required fields
+    if (!wineName || !wineCharacteristics) {
+      return NextResponse.json(
+        { error: 'ワイン名と特性データが必要です' },
+        { status: 400 }
+      );
     }
 
-    console.error('Error creating wine entry:', error);
-    return res.status(500).json({
-      success: false,
-      error: 'Internal server error'
-    });
+    // Map the Japanese characteristics to English for the database
+    const characteristics = {
+      sweetness: wineCharacteristics.甘口,
+      body: wineCharacteristics.軽い,
+      acidity: wineCharacteristics.酸味が弱い,
+      tannin: wineCharacteristics.渋みが弱い,
+      bitterness: wineCharacteristics.苦味が少ない,
+    };
+
+    // Create the wine record
+    const wineData = {
+      name: wineName,
+      characteristics,
+    };
+
+    const createdWine = await wineService.create(wineData);
+
+    return NextResponse.json(
+      { 
+        success: true, 
+        message: 'ワイン記録が正常に保存されました',
+        wine: createdWine 
+      },
+      { status: 201 }
+    );
+
+  } catch (error) {
+    console.error('Error creating wine record:', error);
+    return NextResponse.json(
+      { 
+        error: 'ワイン記録の保存中にエラーが発生しました',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
 } 
