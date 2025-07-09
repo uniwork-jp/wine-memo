@@ -1,12 +1,29 @@
 "use client";
 
 import React, { useState } from 'react';
-import { TextInput, Container, Title, Paper, Stack, Button, Grid, Text } from '@mantine/core';
+import { useRouter } from 'next/navigation';
+import { 
+  Container, 
+  Title, 
+  Text, 
+  Card, 
+  Button, 
+  Grid, 
+  Group, 
+  Stack, 
+  Box,
+  TextInput,
+  NumberInput,
+  Textarea,
+  Select
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
 import { useForm } from '@mantine/form';
-import RadarChart from '@/components/RaderChart';
+import { IconGlass, IconPlus } from '@tabler/icons-react';
+import RadarChart from '../../components/RaderChart';
 
 export default function RecordPage() {
+  const router = useRouter();
   const [wineCharacteristics, setWineCharacteristics] = useState({
     甘口: 50,
     軽い: 50,
@@ -18,9 +35,15 @@ export default function RecordPage() {
   const form = useForm({
     initialValues: {
       wineName: '',
+      notes: '',
+      rating: 0,
+      region: '',
+      vintage: '',
+      grapeVariety: '',
     },
     validate: {
       wineName: (value) => (value.length < 2 ? 'ワイン名は2文字以上で入力してください' : null),
+      rating: (value) => (value < 0 || value > 5 ? '評価は0-5の間で入力してください' : null),
     },
   });
 
@@ -34,6 +57,11 @@ export default function RecordPage() {
         body: JSON.stringify({
           wineName: values.wineName,
           wineCharacteristics,
+          notes: values.notes || null,
+          rating: values.rating || null,
+          region: values.region || null,
+          vintage: values.vintage || null,
+          grapeVariety: values.grapeVariety || null,
         }),
       });
 
@@ -55,6 +83,11 @@ export default function RecordPage() {
           渋みが弱い: 50,
           苦味が少ない: 50,
         });
+
+        // Redirect to top page after successful submission
+        setTimeout(() => {
+          router.push('/');
+        }, 1500); // Wait 1.5 seconds to show the success notification
       } else {
         notifications.show({
           title: 'エラー',
@@ -77,61 +110,112 @@ export default function RecordPage() {
   };
 
   return (
-    <Container size="lg" py="xl">
-      <Paper shadow="md" p="xl" radius="md">
-        <Title order={1} mb="lg" ta="center">
-          ワイン記録
-        </Title>
-        
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Grid gutter="xl">
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Stack gap="md">
-                <TextInput
-                  label="ワイン名"
-                  placeholder="例: シャトー・マルゴー 2018"
-                  required
-                  {...form.getInputProps('wineName')}
-                />
+    <Box bg="gray.0" mih="100vh" py="xl">
+      <Container size="lg">
+        <Stack gap="xl">
+          {/* Header */}
+          <Box ta="center" py="xl">
+            <Title order={1} size="3.5rem" c="dark.8" mb="md">
+              ワイン記録
+            </Title>
+            <Text size="xl" c="dimmed" maw={600} mx="auto">
+              新しいワインの特性を記録して、あなたのワインライブラリに追加しましょう
+            </Text>
+          </Box>
+
+          {/* Record Form */}
+          <Card shadow="sm" padding="xl" radius="md" withBorder>
+            <form onSubmit={form.onSubmit(handleSubmit)}>
+              <Stack gap="lg">
+                <Grid gutter="lg">
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Stack gap="md">
+                      <TextInput
+                        label="ワイン名"
+                        placeholder="例: シャトー・マルゴー 2018"
+                        required
+                        {...form.getInputProps('wineName')}
+                      />
+                      
+                      <Textarea
+                        label="メモ"
+                        placeholder="ワインの感想やメモを入力してください"
+                        rows={3}
+                        {...form.getInputProps('notes')}
+                      />
+
+                      <NumberInput
+                        label="評価"
+                        placeholder="0-5の間で評価してください"
+                        min={0}
+                        max={5}
+                        step={0.5}
+                        {...form.getInputProps('rating')}
+                      />
+
+                      <TextInput
+                        label="産地"
+                        placeholder="例: フランス・ボルドー"
+                        {...form.getInputProps('region')}
+                      />
+
+                      <TextInput
+                        label="ヴィンテージ"
+                        placeholder="例: 2018"
+                        {...form.getInputProps('vintage')}
+                      />
+
+                      <TextInput
+                        label="ブドウ品種"
+                        placeholder="例: カベルネ・ソーヴィニヨン"
+                        {...form.getInputProps('grapeVariety')}
+                      />
+                    </Stack>
+                  </Grid.Col>
+                  
+                  <Grid.Col span={{ base: 12, md: 6 }}>
+                    <Stack gap="md">
+                      <Group>
+                        <IconGlass size={24} color="var(--mantine-color-purple-6)" />
+                        <Title order={2} size="h3">
+                          ワイン特性チャート
+                        </Title>
+                      </Group>
+                      <Text size="sm" c="dimmed">
+                        各特性をドラッグして調整してください
+                      </Text>
+                      
+                      <Box ta="center">
+                        <RadarChart
+                          data={wineCharacteristics}
+                          width={350}
+                          height={350}
+                          onDataChange={handleCharacteristicsChange}
+                        />
+                      </Box>
+                      
+                      <Text size="xs" c="dimmed" ta="center">
+                        甘さ・重さ・酸味・渋み・苦味の5つの特性を評価できます
+                      </Text>
+                    </Stack>
+                  </Grid.Col>
+                </Grid>
                 
-                <Text size="sm" c="dimmed" mt="xs">
-                  ワイン名を入力してください
-                </Text>
+                <Group justify="center" mt="xl">
+                  <Button 
+                    type="submit" 
+                    size="lg"
+                    color="purple"
+                    leftSection={<IconPlus size={16} />}
+                  >
+                    記録を保存
+                  </Button>
+                </Group>
               </Stack>
-            </Grid.Col>
-            
-            <Grid.Col span={{ base: 12, md: 6 }}>
-              <Stack gap="md">
-                <Text fw={500} size="lg">
-                  ワイン特性チャート
-                </Text>
-                <Text size="sm" c="dimmed">
-                  各特性をドラッグして調整してください
-                </Text>
-                
-                <div className="flex justify-center">
-                  <RadarChart
-                    data={wineCharacteristics}
-                    width={350}
-                    height={350}
-                    onDataChange={handleCharacteristicsChange}
-                  />
-                </div>
-                
-                <Text size="xs" c="dimmed" ta="center">
-                  甘さ・重さ・酸味・渋み・苦味の5つの特性を評価できます
-                </Text>
-              </Stack>
-            </Grid.Col>
-          </Grid>
-          
-          <Stack gap="md" mt="xl">
-            <Button type="submit" fullWidth size="lg">
-              記録を保存
-            </Button>
-          </Stack>
-        </form>
-      </Paper>
-    </Container>
+            </form>
+          </Card>
+        </Stack>
+      </Container>
+    </Box>
   );
 }
