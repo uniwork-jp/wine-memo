@@ -4,21 +4,38 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || 'demo-api-key',
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || 'wine-memo-465402.firebaseapp.com',
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || 'wine-memo-465402',
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || 'wine-memo-465402.appspot.com',
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '123456789',
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || 'demo-app-id',
 };
 
-// Initialize Firebase
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Check if we're in a server environment and skip client initialization
+const isServer = typeof window === 'undefined';
 
-// Wine collection reference
-export const winesCollection = collection(db, 'wines');
+let app: any;
+let db: any;
+let auth: any;
+
+if (!isServer) {
+  try {
+    // Initialize Firebase only on client side
+    app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    auth = getAuth(app);
+  } catch (error) {
+    console.warn('Firebase client initialization failed:', error);
+    // Provide fallback objects for development
+    app = null;
+    db = null;
+    auth = null;
+  }
+}
+
+// Wine collection reference (only available on client)
+export const winesCollection = isServer ? null : collection(db, 'wines');
 
 // Wine interface
 export interface Wine {
@@ -44,6 +61,10 @@ export interface Wine {
 export const wineService = {
   // Create a new wine entry
   async create(wineData: Omit<Wine, 'id' | 'createdAt' | 'updatedAt'>): Promise<Wine> {
+    if (!winesCollection) {
+      throw new Error('Firebase not initialized. Please check your environment variables.');
+    }
+    
     const id = Date.now().toString();
     const now = new Date().toISOString();
     const wine: Wine = {
@@ -59,6 +80,10 @@ export const wineService = {
 
   // Get a wine by ID
   async getById(id: string): Promise<Wine | null> {
+    if (!winesCollection) {
+      throw new Error('Firebase not initialized. Please check your environment variables.');
+    }
+    
     const docRef = doc(winesCollection, id);
     const docSnap = await getDoc(docRef);
     
@@ -70,6 +95,10 @@ export const wineService = {
 
   // Get all wines
   async getAll(): Promise<Wine[]> {
+    if (!winesCollection) {
+      throw new Error('Firebase not initialized. Please check your environment variables.');
+    }
+    
     const q = query(winesCollection, orderBy('createdAt', 'desc'));
     const querySnapshot = await getDocs(q);
     
@@ -78,6 +107,10 @@ export const wineService = {
 
   // Update a wine
   async update(id: string, updates: Partial<Omit<Wine, 'id' | 'createdAt'>>): Promise<void> {
+    if (!winesCollection) {
+      throw new Error('Firebase not initialized. Please check your environment variables.');
+    }
+    
     const docRef = doc(winesCollection, id);
     await updateDoc(docRef, {
       ...updates,
@@ -87,6 +120,10 @@ export const wineService = {
 
   // Delete a wine
   async delete(id: string): Promise<void> {
+    if (!winesCollection) {
+      throw new Error('Firebase not initialized. Please check your environment variables.');
+    }
+    
     const docRef = doc(winesCollection, id);
     await deleteDoc(docRef);
   },

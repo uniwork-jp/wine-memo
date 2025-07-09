@@ -6,13 +6,30 @@ import { getAuth } from 'firebase-admin/auth';
 const apps = getApps();
 
 if (!apps.length) {
-  initializeApp({
-    credential: cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    }),
-  });
+  // Check if required environment variables are present
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+
+  if (!projectId || !clientEmail || !privateKey) {
+    console.warn('Firebase Admin SDK environment variables are missing. Please set:');
+    console.warn('- FIREBASE_PROJECT_ID');
+    console.warn('- FIREBASE_CLIENT_EMAIL');
+    console.warn('- FIREBASE_PRIVATE_KEY');
+    console.warn('Server-side Firebase operations will not work without these variables.');
+  } else {
+    try {
+      initializeApp({
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey: privateKey.replace(/\\n/g, '\n'),
+        }),
+      });
+    } catch (error) {
+      console.error('Failed to initialize Firebase Admin SDK:', error);
+    }
+  }
 }
 
 const adminDb = getFirestore();
@@ -84,7 +101,7 @@ export const adminWineService = {
     }, {} as Record<string, number>);
 
     return Object.entries(regionCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([region, count]) => ({ region, count }));
   },
@@ -98,7 +115,7 @@ export const adminWineService = {
     }, {} as Record<string, number>);
 
     return Object.entries(varietyCounts)
-      .sort(([,a], [,b]) => b - a)
+      .sort(([,a], [,b]) => (b as number) - (a as number))
       .slice(0, 5)
       .map(([variety, count]) => ({ variety, count }));
   },

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { wineService } from '@wine-memo/firebase';
+import { adminWineService } from '@wine-memo/firebase';
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,13 +23,23 @@ export async function POST(request: NextRequest) {
       bitterness: wineCharacteristics.苦味が少ない,
     };
 
-    // Create the wine record
+    // Create the wine record using admin service
     const wineData = {
       name: wineName,
       characteristics,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    const createdWine = await wineService.create(wineData);
+    // Use the admin service to create the wine
+    const adminDb = (await import('@wine-memo/firebase')).adminDb;
+    const docRef = adminDb.collection('wines').doc();
+    await docRef.set(wineData);
+
+    const createdWine = {
+      id: docRef.id,
+      ...wineData,
+    };
 
     return NextResponse.json(
       { 
