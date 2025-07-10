@@ -28,4 +28,14 @@ output "firestore_indexes" {
     google_firestore_index.wines_vintage.id,
     google_firestore_index.wines_name_search.id
   ]
+}
+
+output "firestore_location" {
+  description = "The location of the Firestore database"
+  value       = var.firestore_location
+}
+
+output "storage_bucket_name" {
+  description = "The name of the storage bucket for wine labels"
+  value       = google_storage_bucket.wine_labels.name
 } 
