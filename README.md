@@ -7,17 +7,41 @@ A modern wine tasting and management application built with Next.js, Firebase, a
 ### Monorepo Structure
 This project uses a **monorepo architecture** with pnpm workspaces and Turbo for efficient build orchestration:
 
+### Schema-Driven Infrastructure
+This project implements a **schema-driven infrastructure** pattern where Zod validation schemas automatically generate Firebase Firestore indexes and Terraform configurations. This ensures consistency between data validation and infrastructure setup.
+
+**Key Benefits:**
+- ✅ **Single Source of Truth**: Zod schemas drive both validation and infrastructure
+- ✅ **Automatic Index Generation**: Firestore indexes created from schema definitions
+- ✅ **Type Safety**: Full TypeScript support across the stack
+- ✅ **Consistency**: No orphaned indexes or mismatched field definitions
+
+📖 **Learn More**: [Documentation Index](docs/README.md)
+
 ```
 wine-memo/
 ├── apps/
-│   ├── user-ui/          # Main user-facing PWA application
-│   └── admin-ui/         # Admin dashboard for user management
+│   ├── user-ui/          # Main user interface (Next.js PWA)
+│   └── admin-ui/         # Admin dashboard
+├── lib/
+│   ├── zodSchemas.ts     # Zod validation schemas
+│   └── firestoreIndexes.ts # Index definitions & generators
 ├── packages/
-│   ├── firebase/         # Shared Firebase client/server utilities
-│   └── schemas/          # Shared Zod validation schemas
+│   ├── firebase/         # Firebase client/server utilities
+│   └── schemas/          # Shared schema definitions
 ├── infra/
-│   └── firebase/         # Terraform infrastructure as code
-└── lib/                  # Shared utilities and configurations
+│   └── firebase/         # Terraform infrastructure
+├── scripts/
+│   └── generate-terraform-indexes.ts # Infrastructure generator
+└── docs/
+    ├── README.md                  # Documentation index
+    ├── setup/                     # Setup guides
+    │   ├── ENVIRONMENT_SETUP.md
+    │   ├── FIREBASE_SETUP.md
+    │   └── IMAGE_UPLOAD_OCR_SETUP.md
+    └── architecture/              # Architecture docs
+        ├── schema-driven-infrastructure.md
+        └── wine-memo-ER-diagram.md
 ```
 
 ### Technology Stack
@@ -281,3 +305,4 @@ For issues and questions:
 ---
 
 Built with ❤️ using modern web technologies for the ultimate wine tasting experience.
+
