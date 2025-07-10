@@ -11,6 +11,12 @@ Welcome to the Wine Memo documentation! Here you'll find guides for setup, confi
 - [Schema-Driven Infrastructure](./architecture/schema-driven-infrastructure.md)
 - [ER Diagram](./architecture/wine-memo-ER-diagram.md)
 
+## 🔧 API & Functions Reference
+- [Functions Reference](./FUNCTIONS.md) - Complete API endpoints, Firebase functions, and React components
+
+## 📋 Project Overview
+- [Project Functions List](./PROJECT_FUNCTIONS.md) - Complete list of implemented and planned features
+
 ---
 
 For a project overview, see the [main README](../README.md). 
